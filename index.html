@@ -1,0 +1,777 @@
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title>地图底图配置页面</title>
+		<link rel="stylesheet" href="css/index.css" />
+		<!-- 引入样式 -->		
+		<link rel="stylesheet" href="css/elementui.css">
+		<link rel="stylesheet" href="js/leaflet/leaflet.css" />
+		<link rel="stylesheet" href="css/animate.min.css" />
+		<link rel="stylesheet" href="fonts/iconfont/iconfont.css" />
+	
+
+		<style>
+			 /* element样式修改 */
+			.el-input__icon {
+				line-height: 25px;
+			}
+			
+			.el-input__inner {
+				width: 100%;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="app" class="base_map_div">
+			<!--地图信息填写-->
+			<div class="map_content pub_sty">
+				<h3 class="content_title">
+					地图信息填写
+				</h3>
+				<div class="con_content">
+					<div class="con_div">
+						<ul>
+							<li>
+								<div class="con_inp">
+									<span class="map_label">瓦片模板：</span>
+									<el-select @change="templateChange" v-model="template" placeholder="请选择">
+										<el-option v-for="item in templateList" :key="item.value" :label="item.label" :value="item.value">
+										</el-option>
+									</el-select>
+								</div>
+							</li>
+							<li>
+								<div class="map_ditu">
+									<span class="map_label">坐 标 系：</span>
+									<div class="resolution_div_li" style="margin-left:4px ;">
+										<el-input v-model="crs" :disabled="crsDisabled"  placeholder="请输入坐标系EPSG,如:EPSG:2358"></el-input>
+									</div>
+								</div>
+							</li>
+							<li >
+								<div class="map_ditu">
+								<span >地图范围：</span>
+									
+								
+								<div class="range_input" style="margin-left: 6px;">
+									<div class="con_div_li" style="margin-bottom:12px ;">
+										<el-input v-model="minX" oninput="value=value.replace(/[^\d.]/g,'')" placeholder="请输入最小X值"></el-input>-
+										<el-input v-model="maxY" oninput="value=value.replace(/[^\d.]/g,'')" placeholder="请输入最大Y值"></el-input><span>(左上角)</span>
+									</div>
+									<div class="con_div_li">
+										<el-input v-model="maxX" oninput="value=value.replace(/[^\d.]/g,'')" placeholder="请输入最大X值"></el-input>-
+										<el-input v-model="minY" oninput="value=value.replace(/[^\d.]/g,'')" placeholder="请输入最小Y值"></el-input><span>(右下角)</span>
+									</div>
+								</div>
+								</div>
+							</li>
+							<li>
+								<div class="con_inp">
+									<span class="map_label">默认级别：</span>
+									<el-select v-model="level" placeholder="请选择">
+										<el-option v-for="item in levels" :key="item.value" :label="item.label" :value="item.value">
+										</el-option>
+									</el-select>
+								</div>
+							</li>
+					
+							<li>
+								<div class="map_ditu">
+								<span class="map_label">瓦片起点：</span>
+								<div class="con_div_li" style="margin-left:4px ;">
+									<el-input v-model="orginX" :disabled="orginXDisabled" type='number'  placeholder="请输入起点X值"></el-input>-
+									<el-input v-model="orginY" :disabled="orginYDisabled" type='number' placeholder="请输入起点Y值"></el-input>
+								</div>
+								</div>
+							</li>
+							<li>
+								<div class="map_ditu">
+									<span class="map_label">坐标投影：</span>
+									<div class="resolution_div_li" style="margin-left:4px ;">
+										<el-input v-model="crsproj" :disabled="crsprojDisabled"  placeholder="请输入坐标投影,如:+proj=tmerc +lat_0=0 +lon_0=102 +k=1 +x_0=500000 +y_0=0 +a=6378140 +b=6356755.288157528 +units=m +no_defs"></el-input>
+									</div>
+								</div>
+							</li>
+							<li>
+								<div class="map_ditu">
+									<span class="map_label">分 辨 率：</span>
+									<div class="resolution_div_li" style="margin-left:4px ;">
+										<el-input v-model="resolutions" :disabled="resolutionsDisabled"  placeholder="请输入分辨率,多个逗号隔开"></el-input>
+									</div>
+								</div>
+							</li>
+							<li>
+								<div class="map_ditu">
+								<span class="map_label">地图中心：</span>
+								<div class="con_div_li" style="margin-left: 4px;">
+									<el-input v-model="cx" oninput="value=value.replace(/[^\d.]/g,'')" placeholder="请输入X值"></el-input>-
+									<el-input v-model="cy" oninput="value=value.replace(/[^\d.]/g,'')" placeholder="请输入Y值"></el-input>
+								</div>
+								</div>
+							</li>
+							<li class="map_inp input_btn" v-for="item in mapURLs">
+								<span class="map_label">服务地址{{item.index}}：</span>
+								<el-input v-model="mapURLInput[item.index - 1]" placeholder="请输入服务地址"></el-input>
+								<el-button plain @click="addMapURL(item)">+</el-button>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="content_btn">
+					<el-button class="clear_btn">清除</el-button>
+					<el-button class="pre_btn" @click="saveMap" type="primary">保存</el-button>
+				</div>
+			</div>
+			<!--项目红线-->
+			<div class="pro_con pub_sty">
+				<h3 class="content_title">
+					项目红线
+				</h3>
+				<ul class="pro_filer">
+					<el-upload
+						:action="uploadURL"
+						:class="{disabled:redlineUploadNotShow}"
+						list-type="picture-card"
+						ref="redlineUpload"
+						:accept="acceptFileType"
+						:before-upload="redlineBeforeUpload"
+						:limit="1"
+						:disabled="redlineDisabled"
+						:file-list="redlineFileList"
+						:on-success="redlineFileSuccess"
+						:on-error="uploadError"
+						:auto-upload="true">
+					    <!--<i slot="default" class="el-icon-plus"></i>-->
+					    <div slot="file" slot-scope="data" v-loading="redlineLoading">
+					      <div  class="el-upload-list__item-thumbnail"></div>					     
+					      <span class="el-upload-list__item-actions">
+					        <span
+					          class="el-upload-list__item-delete"
+					          @click="handleRemove('redline',data.file)"
+					        >
+					        </span>
+					      </span>
+					      <p>{{data.file.name}}</p>
+					    </div>
+					</el-upload>
+	
+
+				</ul>
+			</div>
+			<!--房屋数据-->
+			<div class="pro_con pub_sty">
+				<h3 class="content_title">
+					房屋数据
+				</h3>
+				<ul class="pro_filer">
+					<el-upload
+						:action="geoJSONParseUploadURL"
+						:class="{disabled:buildingUploadNotShow}"
+						ref="buildingUpload"
+						:accept="acceptFileType"
+						:before-upload="buildingBeforeUpload"
+						:on-success="buildingFileSuccess"
+						:on-error="uploadError"
+						:disabled="buildingDisabled"
+						:file-list="buildingFileList"
+						list-type="picture-card"
+						:auto-upload="true">
+					    <!--<i slot="default" class="el-icon-plus"></i>-->
+					    <div slot="file" slot-scope="data" v-loading="buildingLoading">
+					      <div  class="el-upload-list__item-thumbnail"></div>					     
+					      <span class="el-upload-list__item-actions">
+					        <span
+					          class="el-upload-list__item-delete"
+					          @click="handleRemove('building',data.file)"
+					        >
+					        </span>
+					      </span>
+					      <p>{{data.file.name}}</p>
+					    </div>
+					</el-upload>
+					<el-dialog :visible.sync="dialogVisible">
+					  <img width="100%" :src="dialogImageUrl" alt="">
+					</el-dialog>
+				</ul>
+			</div>
+			<!--矢量数据-->
+			<div class="pro_con pub_sty">
+				<h3 class="content_title">
+					矢量数据
+				</h3>
+				<ul class="pro_filer">
+					<el-upload
+						:action="uploadURL"
+						ref="vectorUpload"
+						:accept="acceptFileType"
+						:before-upload="vectorBeforeUpload"
+						:on-success="vectorFileSuccess"
+						:on-error="uploadError"
+						multiple
+						:disabled="vectorDisabled"
+						:file-list="vectorFileList"
+						list-type="picture-card"
+						:auto-upload="true">
+					    <!--<i slot="default" class="el-icon-plus"></i>-->
+					    <div slot="file" slot-scope="data" v-loading="vectorLoading">
+					      <div  class="el-upload-list__item-thumbnail"></div>					     
+					      <span class="el-upload-list__item-actions">
+					        <span
+					          class="el-upload-list__item-delete"
+					          @click="handleRemove('vector',data.file)"
+					        >
+					        </span>
+					      </span>
+					      <p>{{data.file.name}}</p>
+					    </div>
+					</el-upload>
+					<el-dialog :visible.sync="dialogVisible">
+					  <img width="100%" :src="dialogImageUrl" alt="">
+					</el-dialog>
+				</ul>
+			</div>
+			<!--地图配置-->
+			<div class="map_bot pub_sty">
+				<div>
+					<h3 class="content_title">
+					地图配置
+				   </h3>
+				   <el-button type="primary">刷新</el-button>
+				</div>
+				<div class="map_bot_div" >
+					<div id="map" class="map" style="width:100%;height:400px;"></div>
+				</div>
+				
+			</div>
+		</div>
+	</body>
+	<!-- import Vue before Element -->
+	<script src="js/vue.js"></script>
+	<!-- 引入组件库 -->
+	<script src="js/elementui.js"></script>
+	<script src="js/jquery-1.8.3.min.js"></script>
+	<!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
+	<script src="js/underscore.js"></script>
+	<script src="js/leaflet/leaflet-src.js" type="text/javascript"></script>
+	<script src="js/leaflet/leaflet.geometryutil.js" type="text/javascript"></script>
+	<script src="js/leaflet/L.Control.MousePosition.js" type="text/javascript"></script>
+	<link href="js/leaflet/L.Control.MousePosition.css" rel="stylesheet" type="text/css" />
+	<script src='js/leaflet/leaflet-omnivore.min.js'></script>
+	<script src="js/proj4.js"></script>
+	<script src="js/proj4leaflet.js"></script>
+	<script src="js/javascript.util.js"></script>
+	<script src="js/jsts.js"></script>
+	<script src="js/mapwebapps.js" type="text/javascript"></script>
+	<script src="js/mapconfig.js" type="text/javascript"></script>
+	<script>
+        var ass=""
+        if(JSON.parse(window.localStorage.getItem("onlineUser"))!=null){
+            arr=JSON.parse(window.localStorage.getItem("onlineUser"))
+            console.log(arr.split(",")[33].split(":")[1].substr(1,6))
+             ass=arr.split(",")[33].split(":")[1].substr(1,6)
+        }
+        //http://124.126.15.178:8081/systemcenter/servlet/Action.cmd?callback=jQuery1111022742150432364427_1570521713317&_method=GDGlPdC5yi05QtUuccO6yM86DBzcxDRqLMSnrHoZKTg%3D&bizObj=o%2FduA8n3NfoE0j8VYuLkjA%3D%3D&service=1Kcf3BulnbsNpCncdTc7uw%3D%3D&fields=FtJU3acfRKLpUCfsOGXJkezNFBjYbxjd6ocCMVEIU6JrMs73lxcTlM%2BB2lCfwPlxjD2Q7wDhunkNhLqR7mZjPQ%3D%3D&filter=FePZP7TXvr3OpFCG9Ph%2F7w%3D%3D&currentPageIndex=76SGKIldWgvUcl18Ee4NRQ%3D%3D&pageSize=h1juYjOEJkiHc0h7CeUcpA%3D%3D&Directory=pj8GQPl%2FceCYGOZVNpsfdg%3D%3D&orderList=7jIH1L8pQKEkJTX2sXM3YmAIyooRBA1hTgeSj%2Fx5eMY%3D&timeStamp=%2Fn%2Fp4wI640xJsWRX1N2iYw%3D%3D&_app_key=iy1Td8cVp2LjVzlwDY%2FaiLGi8rZmaepdhohzQSO%2Bi8dGL2eZm1JS7X%2BFI8fdQgMD&_timestamp=D
+        var MAPURL = '/Service';
+        var UploadURL =MAPURL+ 'ShapeUploadHandler.ashx';
+        var MCid=""
+        var GeoJSONParseUploadURL = MAPURL+ '/ImportBuilding2DB.ashx?mcid='+MCid;
+		var TDTResolutions = [
+			{'level' : 1, 'resolution' : 0.3515625, 'scale' : 147748799.285417}, 
+			{'level' : 2, 'resolution' : 0.17578125, 'scale' : 73874399.6427087}, 
+			{'level' : 3, 'resolution' : 0.087890625, 'scale' : 36937199.8213544}, 
+			{'level' : 4, 'resolution' : 0.0439453125, 'scale' : 18468599.9106772}, 
+			{'level' : 5, 'resolution' : 0.02197265625, 'scale' : 9234299.95533859}, 
+			{'level' : 6, 'resolution' : 0.010986328125, 'scale' : 4617149.97766929}, 
+			{'level' : 7, 'resolution' : 0.0054931640625, 'scale' : 2308574.98883465}, 
+			{'level': 8, 'resolution' : 0.00274658203125, 'scale' : 1154287.49441732}, 
+			{'level' : 9, 'resolution' : 0.001373291015625, 'scale' : 577143.747208662}, 
+			{'level' : 10, 'resolution' : 0.0006866455078125, 'scale' : 288571.873604331}, 
+			{'level' : 11, 'resolution' : 0.00034332275390625, 'scale' : 144285.936802165}, 
+			{'level' : 12, 'resolution' : 0.000171661376953125, 'scale' : 72142.9684010827}, 
+			{'level' : 13, 'resolution' : 8.58306884765629E-05, 'scale' : 36071.4842005414}, 
+			{'level' : 14, 'resolution' : 4.29153442382814E-05, 'scale' : 18035.7421002707}, 
+			{'level' : 15, 'resolution' : 2.14576721191407E-05, 'scale' : 9017.87105013534}, 
+			{'level' : 16, 'resolution' : 1.07288360595703E-05, 'scale' : 4508.93552506767}, 
+			{'level' : 17, 'resolution' : 5.36441802978515E-06, 'scale' : 2254.467762533835}, 
+			{'level' : 18, 'resolution' : 2.68220901489258E-06, 'scale' : 1127.2338812669175}];
+		var ProjID = getUrlParam("projid"); //项目ID
+		var VueObj = new Vue({
+			el: '#app',
+			data: function() {
+				return {
+					mapConfig: null,//地图配置
+					redlines: [],//红线数据
+					buildings: [], //房屋单体数据,
+					vectors: [],   //矢量数据
+					templateList: [
+						{
+							label: '国家天地图',
+							value: 'tianditu'
+						},
+						{
+							label: '自定义',
+							value: 'custom'
+						}
+					],
+					template: '',
+					crs: '',  //epsg 
+					crsproj: '',  //
+					resolutions: '',//分辨率,多个逗号隔开
+					levels: [
+						{
+								label: '0',
+								value: 0
+						},
+						{
+								label: '1',
+								value: 1
+						},
+						{
+								label: '2',
+								value: 2
+						},
+						{
+								label: '3',
+								value: 3
+						},
+						{
+								label: '4',
+								value: 4
+						},
+						{
+								label: '5',
+								value: 5
+						},
+						{
+								label: '6',
+								value: 6
+						},
+						{
+								label: '7',
+								value: 7
+						},
+						{
+								label: '8',
+								value: 8
+						},{
+								label: '9',
+								value: 9
+						},{
+								label: '10',
+								value: 10
+						},{
+								label: '11',
+								value: 11
+						},{
+								label: '12',
+								value: 12
+						},{
+								label: '13',
+								value: 13
+						},{
+								label: '14',
+								value: 14
+						},{
+								label: '15',
+								value: 15
+						},{
+								label: '16',
+								value: 16
+						},{
+								label: '17',
+								value: 17
+						},{
+								label: '18',
+								value: 18
+						}
+					],
+					level: 12,
+					cx: null,
+					cy: null,
+					orginX: null,
+					orginY: null,
+					minX: null,
+					minY: null,
+					maxX: null,
+					maxY: null,
+					mapURLs: [{
+						id: 'mapURL1',
+						index: 1
+					}],
+					mapURLInput: [],
+					dialogImageUrl: '',
+					dialogVisible: false,  //
+                    uploadURL: UploadURL,
+                    geoJSONParseUploadURL:GeoJSONParseUploadURL,
+					redlineFileList: [], //红线文件列表
+					buildingFileList: [],  //房屋文件列表
+					vectorFileList: [],  //矢量文件列表
+					orginXDisabled: false,
+					orginYDisabled: false,
+					resolutionsDisabled: false,
+					crsDisabled: false,
+					crsprojDisabled: false,
+					acceptFileType: '.zip',
+					fileFeatures: {},  //文件控件要素对象
+					redlineLoading: false,
+					buildingLoading: false,
+					vectorLoading: false,
+					redlineDisabled: true,
+					buildingDisabled: true,
+					vectorDisabled: true,
+					redlineUploadNotShow: false,
+					buildingUploadNotShow: false
+				}
+			},
+			methods:{
+				loadMapConfig: function(projID){ //根据项目ID获取地图配置
+					loadMapConfig(projID);
+				},				
+				saveMap: function(){//保存地图底图
+					if(this.template == ''){
+						this.$message('请选择瓦片模板！');
+						return;
+					}
+					if(this.orginX == null || this.orginY == null){
+						this.$message('请输入瓦片起点！');
+						return;
+					}
+					if(this.minX == null || this.minY == null || this.maxX == null || this.maxY == null){
+						this.$message('请输入地图范围！');
+						return;
+					}
+					if(this.cx == null || this.cy == null){
+						this.$message('请输入地图中心坐标！');
+						return;
+					}
+					var mapConfig = {
+						crs: this.crs,
+						template: this.template,
+						crsproj: this.crsproj,
+						minX: parseFloat(this.minX),
+						minY: parseFloat(this.minY),
+						maxX: parseFloat(this.minY),
+						maxY: parseFloat(this.minY),
+						orginX: parseFloat(this.orginX),
+						orginY: parseFloat(this.orginY),
+						cx: parseFloat(this.cx),
+						cy: parseFloat(this.cy),
+						level: this.level,
+						resolutions: this.resolutions,
+						mapURLInput: this.mapURLInput,
+                        Path_Supermap:""
+
+					};
+					initMap(mapConfig);
+					this.redlineDisabled = false;
+					this.buildingDisabled = false;
+					this.vectorDisabled = false;
+					//保存到后台
+					if(!ProjID){
+						this.$message('项目ID不存在，无法保存到服务器！');
+						return;
+					}
+					var baseMaps = [];
+					for(var i = 0;i < this.mapURLInput.length;i++){
+						baseMaps.push({
+							MapURL: this.mapURLInput[i],
+							MapType: '',
+							MapName: ''
+						});
+					}
+					var mapConfigObj = {
+						ProjectID: ProjID,
+						CRS: this.crs,
+						Template: this.template,
+						CRSProj: this.crsproj,
+						Minx: parseFloat(this.minX),
+						Miny: parseFloat(this.minY),
+						Maxx: parseFloat(this.maxX),
+						Maxy: parseFloat(this.maxY),
+						OrginX: parseFloat(this.orginX),
+						OrginY: parseFloat(this.orginY),
+						CX: parseFloat(this.cx),
+						CY: parseFloat(this.cy),
+						Level: parseInt(this.level),
+						Resolutions: this.resolutions,
+						Creater:ass,
+						BaseMaps: baseMaps
+					};
+					if(this.mapConfig){
+                        mapConfigObj.ID = this.mapConfig.ID;
+                        MCid= this.mapConfig.ID;
+					}
+					saveMap(mapConfigObj);
+				},			
+				templateChange: function(a){ //瓦片模板切换
+					if(a == 'tianditu'){
+						this.orginX = -180;
+						this.orginY = 90;
+						this.orginXDisabled = true;
+						this.orginYDisabled = true;
+						this.crsDisabled = true;
+						this.crsprojDisabled = true;
+						var resolutions = [];
+						for(var i = 0;i < TDTResolutions.length;i++){
+							resolutions.push(TDTResolutions[i].resolution);
+						}
+						this.resolutions = resolutions.join(',');
+						this.resolutionsDisabled = true;
+						this.minX = -180;
+						this.minY = -90;
+						this.maxX = 180;
+						this.maxY = 90;
+						console.log(this.resolutions);
+					} else {
+						this.orginX = null;
+						this.orginY = null;
+						this.orginXDisabled = false;
+						this.orginYDisabled = false;
+						this.crsDisabled = false;
+						this.crsprojDisabled = false;
+						this.resolutions = '';
+						this.resolutionsDisabled = false;
+						this.minX = null;
+						this.minY = null;
+						this.maxX = null;
+						this.maxY = null;
+					}
+				},
+				addMapURL: function(){//增加地图底图地址
+					var mapURL = this.mapURLs[this.mapURLs.length - 1];
+					this.mapURLs.push({
+						id: 'mapURL' + (mapURL.index + 1),
+						index: mapURL.index + 1
+					});
+				},
+				redlineBeforeUpload: function(file){	//红线上传前				
+					this.beforeUpload(file);
+					this.redlineLoading = true;
+					this.redlineDisabled = true;
+				},
+				buildingBeforeUpload: function(file){		//房屋单体上传前	 			
+					this.beforeUpload(file);
+					this.buildingLoading = true;
+					this.buildingDisabled = true;
+				},
+				vectorBeforeUpload: function(file){		//矢量上传前	 		
+					this.beforeUpload(file);
+					this.vectorLoading = true;
+					this.vectorDisabled = true;
+				},
+				beforeUpload: function(file){			
+					var that=this;
+					//文件类型
+					var fileName=file.name.substring(file.name.lastIndexOf('.')+1);
+					if(fileName!='zip'){
+						that.uploadTemplateDialog=false;
+						that.$message({
+							type:'error',
+							showClose:true,
+							duration:3000,
+							message:'文件类型不是.zip文件!'
+						});
+						return false;
+					}
+					//读取文件大小
+					var fileSize=file.size;
+					console.log(fileSize);
+					if(fileSize > 1048576 * 50){
+						that.uploadTemplateDialog=false;
+						that.$message({
+							type:'error',
+							showClose:true,
+							duration:3000,
+							message:'文件大于50M!'
+						});
+						return false;
+					}
+				},
+				showRedlineList: function(files){  //显示红线文件列表
+					var that=this;
+					var u = that.$refs.redlineUpload;
+					u.uploadFiles = files;
+					if(files.length > 0){
+						this.redlineDisabled = true;
+						this.redlineUploadNotShow = true;
+					}
+				},
+				showBuildingList: function(files){  //显示红线文件列表
+					var that=this;
+					var u = that.$refs.buildingUpload;
+					u.uploadFiles = files;
+					if(files.length > 0){
+						this.buildingDisabled = true;
+						this.buildingUploadNotShow = true;
+					}
+				},
+				showVectorList: function(files){  //显示矢量文件列表
+					var that=this;
+					var u = that.$refs.vectorUpload;
+					u.uploadFiles = files;
+					if(files.length > 0){
+						this.vectorDisabled = true;
+						//this.vectorUploadNotShow = true;
+					}
+				},
+				handleRemove: function(fileType, file,fileList){ //附件移除
+					var that=this;
+					var u = that.$refs.redlineUpload;
+					if(fileType == 'building'){
+						u = that.$refs.buildingUpload;
+					} else if(fileType == 'vector'){
+						u = that.$refs.vectorUpload;
+					} 
+					var files = u.uploadFiles;
+					var newFiles = [];
+					for(var i = 0;i < files.length;i++){
+						if(files[i].name != file.name){
+							newFiles.push(files[i]);
+						}
+					}
+					
+					u.uploadFiles = newFiles;
+					var lyr = this.fileFeatures[file.name];
+					if(lyr){
+						map.removeLayer(lyr);
+						this.fileFeatures[file.name] = null;
+					}
+					if(newFiles.length == 0){
+						if(fileType == 'building'){
+							this.buildingDisabled = false;
+							this.buildingUploadNotShow = false;
+						} else if(fileType == 'vector'){
+							this.vectorDisabled = false;
+						} else {
+							this.redlineDisabled = false;
+							this.redlineUploadNotShow = false;
+						}
+					}
+					deleteMapData(this.mapConfig.ID,fileType,file.name);
+				},
+				redlineFileSuccess: function(response, file, fileList){ //红线上传成功
+					var features = response.features;
+					this.redlineLoading = false;
+					this.redlineDisabled = false;
+					this.redlineUploadNotShow = true;
+					
+					features = showRedline(file.name,features);
+					
+					//保存到服务器
+					saveRedline(file.name, this.mapConfig.ID, features);
+				},
+				buildingFileSuccess: function(response, file, fileList){  //房屋单体上传成功
+                    console.log(response)
+                    
+					this.buildingDisabled = false;
+					this.buildingUploadNotShow = true;
+					//var features = response.features;
+				     var geosonURL = response.path;
+						
+					//保存到服务器
+                    saveBuilding(response);
+                    
+					  showBuilding(this.mapConfig.ID,geosonURL);  //改成显示geoserver WMS
+				},
+				vectorFileSuccess: function(response, file, fileList){ //矢量上传成功
+					var features = response.features;				
+					this.vectorLoading = false;
+					this.vectorDisabled = false;
+					showVector(file.name,features);
+					
+					//保存到服务器
+					saveVector(file.name, this.mapConfig.ID, features);
+					
+		
+				},
+				uploadError: function(){  //文件上传失败
+					this.buildingLoading = false;
+					this.buildingDisabled = false;
+					this.vectorLoading = false;
+					this.vectorDisabled = false;
+					this.redlineLoading = false;
+					this.redlineDisabled = false;
+				}
+			},
+			watch: {
+				mapConfig:function(val, oldVal){
+                    console.log(oldVal)
+					this.template = val.Template;					
+					this.cx = val.CX;
+					this.cy = val.CY;
+					this.level = val.Level;
+					
+					if(this.template == 'tianditu'){
+						this.orginX = -180;
+						this.orginY = 90;
+						this.orginXDisabled = true;
+						this.orginYDisabled = true;
+						this.crsDisabled = true;
+						this.crsprojDisabled = true;
+						this.resolutions = val.Resolutions;
+						this.resolutionsDisabled = true;
+						this.minX = -180;
+						this.minY = -90;
+						this.maxX = 180;
+						this.maxY = 90;
+					} else {
+						this.crs = val.CRS;
+						this.crsproj = val.CRSProj;
+						this.orginX = val.OrginX;
+						this.orginY = val.OrginY;
+						this.orginXDisabled = true;
+						this.orginYDisabled = true;
+						this.resolutions = val.Resolutions;
+						this.resolutionsDisabled = true;
+						this.minX = val.Minx;
+						this.minY = val.Miny;
+						this.maxX = val.Maxx;
+						this.maxY = val.Maxy;
+					}
+					if(val.BaseMaps){
+						for(var i = 0;i < val.BaseMaps.length;i++){
+							this.mapURLInput.push(val.BaseMaps[i].MapURL);
+						}
+					}
+					
+					var mapConfig = {
+						template: this.template,
+						crs: this.crs,
+						crsproj: this.crsproj,
+						minX: this.minX,
+						minY: this.minY,
+						maxX: this.maxX,
+						maxY: this.maxY,
+						orginX: this.orginX,
+						orginY: this.orginY,
+						cx: this.cx,
+						cy: this.cy,
+						level: this.level,
+						resolutions: this.resolutions,
+						mapURLInput: this.mapURLInput
+					};
+					initMap(mapConfig);
+					this.redlineDisabled = false;
+					this.buildingDisabled = false;
+					this.vectorDisabled = false;
+				}
+			},
+			mounted: function(){		
+				initMap();					
+				if(ProjID && ProjID != ''){
+					this.loadMapConfig(ProjID);
+				}
+			}
+		})
+		
+		function getUrlParam(name) {
+            console.log(window.location.search.substr(1).match(reg))
+			var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+			var r = window.location.search.substr(1).match(reg); //匹配目标参数
+			if (r != null) return unescape(r[2]); return null; //返回参数值 
+		}
+	</script>
+
+</html>

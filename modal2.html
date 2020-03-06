@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>房屋信息详情弹窗信息</title>
+		<link rel="stylesheet" type="text/css" href="css/num1.css" />
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+		<style>
+			/* element样式修改 */
+        .el-table th{
+            padding: 5px 0;
+            background: #f5f6fa;
+            color: #141414;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .el-table td{
+            padding: 5px 0;
+            text-align: center;
+        }
+        .el-pager li{
+            width: 25px;
+            min-width: 25px;
+            padding: 0 2px; 
+        }
+        .clear{
+        	clear: both;
+        }
+		</style>
+	</head>
+
+	<body>
+		<div class="box_tab" id="app">
+			<div>
+				<p class="title_sty">房屋信息</p>
+				<span class="closeX"></span>
+			</div>
+			<div id="content">
+				<div id="tab_bar">
+					<ul>
+						<li id="tab1" onclick="myclick(1)" style="border-bottom:2px solid #2368bd">
+							户主一
+						</li>
+						<li id="tab2" onclick="myclick(2)">
+							户主二
+						</li>
+					</ul>
+				</div>
+				<!--户主一的信息-->
+				<div class="tab_css" id="tab1_content" style="display: block">
+					<div class="tab_content">
+						<div class="userInfo clearfix">
+							<div class="user_pic"></div>
+							<div class="user_text">
+								<p><span>姓名：</span>房主一</p>
+								<p><span>身份证：</span>410581199003152560</p>
+								<p><span>编号：</span>010203-01-0087</p>
+								<p><span>地址：</span>雄安新区-雄县-ty陆港镇-ty时间房村</p>
+							</div>
+						</div>
+						<div class="tab_content_tab">
+							<div class="tab" id="tab">
+								<span class="active">房屋信息</span>
+								<span>对比信息</span>
+								<span>对比分析表</span>
+							</div>
+							<!--房屋信息-->
+							<div class="tabdiv">
+								<div class="tabpane" style="display: block;">
+									<div class="view_body">
+										<div class="body_table">
+											<el-table :data="householderData">
+												<el-table-column prop="num" label="房屋编号">
+												</el-table-column>
+												<el-table-column prop="scarea" label="实测面积/m²">
+												</el-table-column>
+											</el-table>
+										</div>
+									</div>
+								</div>
+								<!--对比信息-->
+								<div class="tabpane">
+									<ul class="list_info">
+										<li>图测面积：<span>716.5m²</span></li>
+										<li>实测面积：<span>0m²</span></li>
+										<li>误差率：<span>0%</span></li>
+									</ul>
+								</div>
+								<!--对比分析表-->
+								<div class="tabpane">
+									对比分析表
+								</div>
+								<div class="clear"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!--户主二的页面-->
+				<div class="tab_css" id="tab2_content">
+					<div>户主二的页面</div>
+				</div>
+				<div class="clear"></div>
+			</div>
+		</div>
+	</body>
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	<script>
+		new Vue({
+			el: '#app',
+			data: function() {
+				return {
+                    householderData: [{
+	                    num: '010203-01-0087-1',
+	                    scarea:'10'
+	                }, {
+	                    num: '010203-01-0087-1',
+	                     scarea:'10'
+	                }, {
+	                    num: '010203-01-0087-1',
+	                     scarea:'10'
+	                }, {
+	                    num: '010203-01-0087-1',
+	                    scarea:'10'
+	                }, {
+	                    num: '010203-01-0087-1',
+	                    scarea:'10'
+	                }],
+				}
+			}
+		})
+		var myclick = function(v) {
+			var llis = document.getElementsByTagName("li");
+			for(var i = 0; i < llis.length; i++) {
+				var lli = llis[i];
+				if(lli == document.getElementById("tab" + v)) {
+					lli.style.borderBottomColor = "#2368bd";
+					lli.style.borderBottomStyle = "solid";
+					lli.style.borderBottomWidth = "2px";
+				} else {
+					lli.style.borderBottom = "none";
+				}
+			}
+			var divs = document.getElementsByClassName("tab_css");
+			for(var i = 0; i < divs.length; i++) {
+				var divv = divs[i];
+				if(divv == document.getElementById("tab" + v + "_content")) {
+					divv.style.display = "block";
+				} else {
+					divv.style.display = "none";
+				}
+			}
+		}
+		var span = document.querySelectorAll('#tab span'), //css选择器
+			div = document.querySelectorAll('.tabpane');
+
+		for(var i = 0; i < span.length; i++) { //循环span标签
+			span[i].idx = i;
+			//给span一个自定义的idx属性，将I赋值进去，因为下边的循环不能直接拿到这个循环的i
+			span[i].onclick = function() {
+				for(var j = 0; j < div.length; j++) { //循环div标签
+					div[j].style.display = 'none'; //每次点击都先隐藏掉div，并移除class
+					span[j].classList.remove('active');
+				}
+				div[this.idx].style.display = 'block'; //给当前div显示出来
+				this.classList.add('active'); //增加class
+			}
+		}
+	</script>
+
+</html>

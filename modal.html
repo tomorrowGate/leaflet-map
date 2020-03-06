@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>户主弹窗加大图标</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        /*大图标样式*/
+        .pub_icon{
+        	width:40px;
+        	height: 40px;
+        	border-radius: 6px;
+        	background: white;
+        	box-shadow:rgba(0,0,0,.08) 0 0 6px;
+        	position: fixed;        	
+        }
+        .holder_icon{
+        	background: url(img/holder_icon_03.png) no-repeat center center;
+        	left: 20px;
+        	top: 20px;
+        }
+        .area_icon{
+        	background: url(img/area_icon_06.png) no-repeat  center center;
+        	left: 20px;
+        	top: 70px;
+        }
+        .layer_icon{
+        	background: url(img/image_icon_08.png) no-repeat center center;
+        	right: 180px;
+        	top: 20px;
+        }
+        .vector_icon{
+        	background: url(img/vector_icon_10.png) no-repeat center center;
+        	top: 20px;
+        	right:130px;
+        }
+        /*弹窗样式*/
+        #app{
+        	width: 310px;
+        	box-shadow: rgba(0,0,0,.1) 0 0 10px;
+        	position: absolute;
+        	top: 90px;
+        	left: 190px;
+        	border-radius: 4px;
+        }
+        .common_btn{
+            height: 30px;
+            line-height: 30px;
+            background: #2368bd;
+            border-radius: 3px;
+            border: none; 
+        }
+        .common_input{
+            padding: 0 5px;
+            border: 1px solid #dcdfe6;
+            border-radius: 3px;
+        }
+        .view_header{
+            height: 40px;
+            width: 100%;
+        }
+        .header_back{
+            float: left;
+            width: 40px;
+            height: 100%;
+            background: linear-gradient(to right, #1cbafe, #1264b7);
+            border-radius: 4px 0 100% 0;
+        }
+        .header_back_icom{
+            margin: 8px;
+        }
+        .header_title{
+            float: left;
+            width: calc(100% - 80px);
+            height: 100%;
+            text-align: center;
+        }
+        .header_title_text{
+            display: inline-block;
+            height: 40px;
+            line-height: 40px;
+            font-size: 18px;
+            letter-spacing:1px;
+            font-weight: bolder;
+        }
+        .header_close{
+            float: left;
+            width: 40px;
+            height: 100%;
+        }
+        .header_close_icon{
+            margin: 15px;
+        }
+        .view_search{
+            width: calc(100% - 28px);
+            height: 80px;
+            padding: 20px 14px 0;
+        }
+        .search_one{
+            width: 100%;
+            height: 40px;
+        }
+        .search_one_input{
+            width: calc(100% - 13px);
+            height: 30px;
+        }
+        .search_two{
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            height: 40px;
+        }
+        .search_two_input_box{
+            width: 46%;
+        }
+        .search_two_btn_box{
+            width: 40%;
+            text-align: center;
+        }
+        .search_two_input{
+            width: 100%;
+            height: 30px;
+        }
+        .search_two_btn{
+            width: 30px;
+        }
+        .search_two_clear{
+            color: #fff;
+            margin-left:10px; 
+            width: 70px;
+        }
+        .search_icon{
+            padding: 7px 0;
+        }
+        .clear_icon{
+            float: left;
+            padding: 7px 4px;
+        }
+        .clear_text{
+            float: left;
+            margin-left: 5px; 
+            height: 30px;
+            line-height: 30px;
+        }
+        .view_body{
+            width: calc(100% - 28px);
+            /*height: 320px;*/
+            padding: 20px 14px;
+        }
+        .body_table{
+            width: 100%;
+        }
+        .body_page{
+            margin-top: 20px;
+            height: 32px;
+        }
+        .page_total{
+            float: left;
+            width: 80px;
+            height: 32px;
+            line-height: 32px;
+            font-size: 14px;
+            opacity: .5;
+        }
+        .page_box{
+            width: calc(100% - 80px);
+            float: left;
+            text-align: right;
+        }
+        /* element样式修改 */
+        .el-table th{
+            padding: 5px 0;
+            background: #f5f6fa;
+            color: #141414;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .el-table td{
+            padding: 5px 0;
+            text-align: center;
+        }
+        .el-pager li{
+            width: 25px;
+            min-width: 25px;
+            padding: 0 2px; 
+        }
+    </style>
+</head>
+<body>
+	<div class="holder_icon pub_icon">		
+	</div>
+	<div class="area_icon pub_icon">		
+	</div>
+	<div class="layer_icon pub_icon">		
+	</div>
+	<div class="vector_icon pub_icon">		
+	</div>
+    <div id='app'>
+        <div class='view_header'>
+            <div class='header_back'>
+                <img class='header_back_icom' src="img/up_Arrow_icon_03.png" alt="">
+            </div>
+            <div class="header_title">
+                <span class='header_title_text'>户主列表</span>
+            </div>
+            <div class='header_close'>
+                <img class="header_close_icon" src="img/close_icon_06.png" alt="">
+            </div>
+        </div>
+        <div class="view_search">
+            <div class="search_one">
+                <input class='common_input search_one_input' type="text" placeholder="请选择地址">
+            </div>
+            <div class="search_two">
+                <div class='search_two_input_box'>
+                    <input class='common_input search_two_input' type="text" placeholder="请输入户主姓名">
+                </div>
+                <div class="search_two_btn_box">
+                    <button class='common_btn search_two_search'>
+                        <img class='search_icon' src='img/search_icon_11.png' alt="" />
+                    </button>
+                    <button class='common_btn search_two_clear'>
+                        <img class='clear_icon' src='img/refresh_icon_13.png' alt="" />
+                        <span class='clear_text'>清除</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="view_body">
+            <div class="body_table">
+                <el-table
+                    :data="tableData"                   
+                > <!--style="width: calc(100% - 10px)"-->
+                    <el-table-column
+                        prop="gender"
+                        label="性别"
+                        width="50"
+                        >
+                        <template slot-scope='scope'>
+                            <img :src='scope.row.gender === 1 ? genderMan : genderWoman' alt='' />
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        prop="num"
+                        label="调查编号">
+                    </el-table-column>
+                    <el-table-column
+                        prop="name"
+                        label="户主姓名"
+                        :filters="[{ text: '户主', value: '户主' }, { text: '集体', value: '集体' }]"
+                        :filter-method="filterTag">
+                    </el-table-column>
+                    <el-table-column
+                        prop="status"
+                        label="状态"
+                        width="50"
+                    >
+                        <template slot-scope='scope'>
+                            <img :src='scope.row.status === 1 ? statusTrue : statusFalse' alt='' />
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
+            <div class="body_page">
+                <div class='page_total'>
+                    <span>共{{total}}户</span>
+                </div>
+                <div class="page_box">
+                    <el-pagination
+                        layout="prev, pager, next"
+                        :total="50">
+                    </el-pagination>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: function() {
+            return { 
+                total: 128,
+                genderMan: 'img/nan_icon_06.png',
+                genderWoman: 'img/nv_icon_03.png',
+                statusTrue: 'img/state_green_icon_18.png',
+                statusFalse: 'img/state_red_icon_21.png',
+                tableData: [{
+                    num: '01-1002',
+                    gender: 1,
+                    status: 1,
+                    name: 'shiyujian'
+                }, {
+                    num: '01-1002',
+                    gender: 1,
+                    status: 0,
+                    name: 'wangl'
+                }, {
+                    num: '01-1003',
+                    gender: 0,
+                    status: 1,
+                    name: 'jiangzp'
+                }, {
+                    num: '01-1002',
+                    gender: 1,
+                    status: 0,
+                    name: 'wangl'
+                }, {
+                    num: '01-1003',
+                    gender: 0,
+                    status: 1,
+                    name: 'jiangzp'
+                }],
+                visible: false 
+            }
+        }
+    })
+</script>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>房屋信息弹窗</title>
+		<!-- 引入样式 -->
+        <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+        <style>
+        	body{
+	            margin: 0;
+	            padding: 0;
+	        }
+	        #app{
+	        	width: 310px;
+	        	box-shadow: rgba(0,0,0,.1) 0 0 10px;
+	        	position: absolute;
+	        	top: 40px;
+	        	left: 40px;
+	        	border-radius: 4px;
+	        }
+	        .view_header{
+	            height: 40px;
+	            width: 100%;
+	        }
+	        .header_back{
+	            float: left;
+	            width: 40px;
+	            height: 100%;
+	            background: linear-gradient(to right, #1cbafe, #1264b7);
+	            border-radius: 4px 0 100% 0;
+	        }
+	        .header_back_icom{
+	            margin: 8px;
+	        }
+	        .header_title{
+	            float: left;
+	            width: calc(100% - 80px);
+	            height: 100%;
+	            text-align: center;
+	        }
+	        .header_title_text{
+	            display: inline-block;
+	            height: 40px;
+	            line-height: 40px;
+	            font-size: 18px;
+	            font-weight: bolder;
+                letter-spacing:1px;
+	        }
+	        .header_close{
+	            float: left;
+	            width: 40px;
+	            height: 100%;
+	        }
+	        .header_close_icon{
+	            margin: 15px;
+	        }
+	        .info_content{
+	        	padding:14px;
+	        	margin-bottom: 16px;
+	        }
+	        /* element样式修改 */
+	        .el-table th{
+	            padding: 5px 0;
+	            background: #f5f6fa;
+	            color: #141414;
+	            font-size: 14px;
+	            font-weight: 500;
+	            text-align: center;
+	        }
+	        .el-table td{
+	            padding: 5px 0;
+	            text-align: center;
+	        }
+	        .el-pager li{
+	            width: 25px;
+	            min-width: 25px;
+	            padding: 0 2px; 
+	        }
+	        .el-table .cell, .el-table th div, .el-table--border td:first-child .cell, .el-table--border th:first-child .cell{
+	        	padding-left:0;
+	        }
+	        .el-table .cell, .el-table th div{
+	        	padding-right: 0;
+	        }
+        </style>
+	</head>
+	<body>
+		<div id="app">
+			<div class='view_header'>
+	            <div class='header_back'>
+	                <img class='header_back_icom' src="img/up_Arrow_icon_03.png" alt="">
+	            </div>
+	            <div class="header_title">
+	                <span class='header_title_text'>房屋信息（段文林）</span>
+	            </div>
+	            <div class='header_close'>
+	                <img class="header_close_icon" src="img/close_icon_06.png" alt="">
+	            </div>
+	        </div>
+	        <div class="info_content">
+	        	<div class="view_body">
+		            <div class="body_table">
+		                <el-table
+		                    :data="userDate"
+		                >
+		                    <el-table-column
+		                        prop="type"
+		                        label="房屋类型"
+		                        width="70"
+		                    >		                        
+		                    </el-table-column>
+		                    <el-table-column
+		                        prop="fwarea"
+		                        label="房屋面积"
+		                        width="70">
+		                    </el-table-column>
+		                    <el-table-column
+		                        prop="sign"
+		                        label="标记位置"
+		                        width="70">
+		                        <template slot-scope='scope'>
+		                            <img :src='scope.row.sign === 1 ? signTrue : signFalse' alt='' />
+		                        </template>
+		                    </el-table-column>
+		                    <el-table-column
+		                        prop="del"
+		                        label="删除位置"
+		                        width="70"
+		                    >
+		                        <template slot-scope='scope'>
+		                            <img :src='scope.row.del' alt='' />
+		                        </template>
+		                    </el-table-column>
+		                </el-table>
+		            </div>
+		        </div>
+	        </div>
+		</div>
+	</body>
+	<!-- import Vue before Element -->
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<!-- 引入组件库 -->
+	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	<script>
+		new Vue({
+        el: '#app',
+        data: function() {
+            return {
+            	signTrue:'img/sign_icon_03.png',
+            	signFalse:'img/sign_icon_03.png',
+            	userDate: [{
+                    type: '01-019',
+                    fwarea: 31,
+                    sign: 1,
+                    del: 'img/del_icon_05.png'
+                }, {
+                    type: '01-013',
+                    fwarea: 10,
+                    sign: 0,
+                    del: 'img/del_icon_05.png'
+                }, {
+                    type: '01-013',
+                    fwarea: 10,
+                    sign: 1,
+                    del: 'img/del_icon_05.png'
+                }],
+            }
+           }
+      })
+	</script>
+</html>
