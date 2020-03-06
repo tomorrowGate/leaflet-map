@@ -1054,7 +1054,8 @@
                 <div class="view_body">
                     <div class="body_tables">
                         <el-table :data="tableData" highlight-current-row ref="singleTable" highlight-current-row
-                            @current-change="handleCurrentChange">
+                            @current-change="handleCurrentChange"
+                            @filter-change="handleFilterChange">
                             <!--style="width: calc(100% - 10px)"-->
                             <el-table-column prop="gender" label="性别" width="45">
                                 <template slot-scope='scope'>
@@ -1065,7 +1066,9 @@
                             </el-table-column>
                             <el-table-column v-if="headstate" prop="status" label="户主姓名"
                             :filters="[{ text: '户主', value: '户主' }, { text: '集体', value: '集体' }]"
-                            :filter-method="filterTag">
+                            :filter-method="filterTag"
+                            column-key="tagArr"
+                            filter-placement="bottom-end">
                                 <template slot-scope='scope'>
                                     <el-button @click="handleClick(scope.row)" type="text" size="small">
                                         {{scope.row.HZXM}}
@@ -1074,7 +1077,9 @@
                             </el-table-column>
                             <el-table-column v-if="!headstate" prop="status" label="户主姓名"
                             :filters="[{ text: '户主', value: '户主' }, { text: '集体', value: '集体' }]"
-                            :filter-method="filterTag">
+                            :filter-method="filterTag"
+                            column-key="tagArr"
+                            filter-placement="bottom-end">
                                 <template slot-scope='scope'>
                                     <el-button type="text" @click=" HUZUname(scope.row)" size="small">{{scope.row.HZXM}}
                                     </el-button>
@@ -1504,10 +1509,7 @@
                         num: '010203-01-0087-1',
                         scarea: '10'
                     }],
-                    hostTableData:[],
-                    hostTotal:128,
-                    groupTableData:[],
-                    groupTotal:128,
+                    whichShow:0,//户主列表显示，0代表全部，167代表户主，168代表集体
                     figure: [],
                     result: [],
                     visible: false,
@@ -1949,7 +1951,7 @@
                 changeclick: function (val) {
                     console.log(val + "当前页")
                     this.yeval = val
-                    this.page_data(val)
+                    this.page_data(val,this.whichShow)
                 },
                 //选择区域筛选  市
                 sumTypeCkeck_1: function (val) {
@@ -2154,11 +2156,11 @@
                     });
                 },
                 //获取当前页面数据
-                page_data: function (val,type="") {
+                page_data: function (val,type) {
                     var _this = this
                     var filterStr
                     if(type){
-                        filterStr = " and 'qsxz' =" + "'"+type+"'"
+                        filterStr = " and qsxz =" + type
                     }else{
                         filterStr = ""
                     }
@@ -2169,7 +2171,7 @@
                             bizObj: "DC_M_HUZHU", // 查询对象表名称
                             service: "SELECT_COUNT_HZ_AND_QY", // 具体的查询方法名称
                             fields: "*", // 要查询的字段
-                            filter: _this.filterstr + filterStr,
+                            filter: _this.filterstr ,
                             timeStamp: new Date().getTime() + ""//避免使用缓存中数据
                         }),
                         async: false,
@@ -2187,7 +2189,7 @@
                                         bizObj: "DC_M_HUZHU", // 查询对象表名称
                                         service: "DC_M_HUZHU.SELECT_MORE_HZ_AND_QY", // 具体的查询方法名称
                                         fields: "*", // 要查询的字段
-                                        filter: _this.filterstr, // 查询条件
+                                        filter: _this.filterstr+ filterStr, // 查询条件
                                         pageSize: _this.pageSize,
                                         currentPageIndex: val,
                                         // orderList: "[{'field':'LRSJ','order':'desc'}]",//排序免使用缓存中数据
@@ -2219,95 +2221,26 @@
                         }
                     });
                 },
-                getHostInfo:function(type){
-                    var _this = this
-                    console.log(_this.filterstr+" and 'qsxz' =" + type);
-                    
-                    $.ajax({
-                        url: action,
-                        data: signMD5({//转换编码
-                            _method: "application.getGridPaginate", // 方法名
-                            bizObj: "DC_M_HUZHU", // 查询对象表名称
-                            service: "SELECT_COUNT_HZ_AND_QY", // 具体的查询方法名称
-                            fields: "*", // 要查询的字段
-                            filter: _this.filterstr ,
-                            timeStamp: new Date().getTime() + ""//避免使用缓存中数据
-                        }),
-                        async: false,
-                        cache: true,//避免自动加上时间戳参数，_=?
-                        dataType: "jsonp",
-                        success: function (result) {
-                            console.log(result)
-                            if (true||result.paginate != undefined) {
-                                //type == 167 ? _this.hostTotal = results.paginate.allList : _this.groupTotal = results.paginate.allList;
-                                $.ajax({
-                                    url: action,
-                                    data: signMD5({//转换编码
-                                        _method: "component.getListData", // 方法名
-                                        bizObj: "DC_M_HUZHU", // 查询对象表名称
-                                        service: "DC_M_HUZHU.SELECT_MORE_HZ_AND_QY", // 具体的查询方法名称
-                                        fields: "*", // 要查询的字段
-                                        filter: _this.filterstr+" and qsxz =168", // 查询条件
-                                        pageSize: _this.pageSize,
-                                        currentPageIndex: 1,
-                                        // orderList: "[{'field':'LRSJ','order':'desc'}]",//排序免使用缓存中数据
-
-                                        timeStamp: new Date().getTime() + ""//避免使用缓存中数据
-                                    }),
-                                    cache: true,//避免自动加上时间戳参数，_=?
-                                    dataType: "jsonp",
-                                    success: function (results) {
-                                        console.log(results,'获取host消息')
-                                        //集体的数据
-                                        // type == 167 ? _this.hostTableData = results.datas
-                                        // :type == 168 ? _this.groupTableData = results.datas : _this.groupTableData = [];
-                                        if(results.datas){
-                                            type == 167 ? _this.hostTableData = results.datas : _this.groupTableData = results.datas;
-                                        }
-                                        
-                                        if (_this.headstate == false) {
-                                            _this.zanshisiqu = results.datas;
-                                        }
-                                        var shu = ""
-                                        if (xzc % _this.pageSize != 0) {
-                                            shu = xzc % _this.pageSize - 1
-                                        } else {
-                                            shu = _this.pageSize
-                                        }
-                                        _this.$refs.singleTable.setCurrentRow(VueObj.tableData[shu]);
-
-                                    }
-                                });
-                            }
-                        }
-                    });
-                },
                 //切换 户主和集体 
-                filterTag: function (value, row){
-                    var _this = this
-                    console.log(value,row.ID,_this.yeval);
-                   if(value == "户主" ){
-                        console.log(this.hostTableData,"this.hostTableData");
-                        
-                        //this.page_data(1,167)
-                        /* this.total = this.hostTotal
-                        this.hostTableData&&this.hostTableData.forEach(function(v,i){
-                            return v.ID == row.ID
-                        })
-                        return parseInt(row.ID) >= 7470000  */
-                   }
-                   if(value == "集体"){
-                        console.log(this.groupTableData,"this.groupTableData");
-                        //this.page_data(1,168)
-                       /*  this.total = this.groupTotal
-                        this.groupTableData && this.groupTableData.forEach(function(v,i){
-                            return v.ID == row.ID
-                        })
-                        return parseInt(row.ID) < 7470000  */
-                   }
-                   else{
-                       return true
-                   }
+                filterTag: function (value){
+                    return true
+                },
+                handleFilterChange:function(filter){
+                    console.log(filter,"filter");
+                    var value = filter.tagArr
+                    if(value.length == 1){
+                        if (value == "户主" ){
+                            console.log("this.hostTableData");
+                            this.whichShow =  167
+                        }
+                        if(value == "集体"){
+                            console.log("this.groupTableData");
+                            this.whichShow = 168 
+                        }
+                    }else{
+                        this.whichShow = 0
+                    }
+                    
                 },
                 //根据区域进行赛选
                 region_find: function (val) {
@@ -3826,11 +3759,13 @@
                 this.region()
                 this.page_data(1)
                 this.data_page()
-                this.getHostInfo(167)
-                this.getHostInfo(168)
             },
             watch: {
                 input: function () {
+                },
+                whichShow:function(){
+                    console.log(this.whichShow);
+                    this.page_data(1,this.whichShow)
                 }
             },
         })
